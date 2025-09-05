@@ -26,3 +26,5 @@ D:\programacion\Proyectos\clima\bin\Debug\net9.0\sv\Spectre.Console.Cli.resource
 D:\programacion\Proyectos\clima\bin\Debug\net9.0\zh-Hans\Spectre.Console.Cli.resources.dll
 D:\programacion\Proyectos\clima\obj\Debug\net9.0\clima.csproj.AssemblyReference.cache
 D:\programacion\Proyectos\clima\obj\Debug\net9.0\clima.csproj.Up2Date
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\Newtonsoft.Json.dll
+D:\programacion\Proyectos\clima\obj\Debug\net9.0\clima.sourcelink.json
