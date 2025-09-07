@@ -28,3 +28,13 @@ D:\programacion\Proyectos\clima\obj\Debug\net9.0\clima.csproj.AssemblyReference.
 D:\programacion\Proyectos\clima\obj\Debug\net9.0\clima.csproj.Up2Date
 D:\programacion\Proyectos\clima\bin\Debug\net9.0\Newtonsoft.Json.dll
 D:\programacion\Proyectos\clima\obj\Debug\net9.0\clima.sourcelink.json
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\Google.FlatBuffers.dll
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\Microsoft.Extensions.Configuration.dll
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\Microsoft.Extensions.Configuration.Abstractions.dll
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\Microsoft.Extensions.Configuration.FileExtensions.dll
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\Microsoft.Extensions.Configuration.Json.dll
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\Microsoft.Extensions.FileProviders.Abstractions.dll
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\Microsoft.Extensions.FileProviders.Physical.dll
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\Microsoft.Extensions.FileSystemGlobbing.dll
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\Microsoft.Extensions.Primitives.dll
+D:\programacion\Proyectos\clima\bin\Debug\net9.0\openmeteo_sdk.dll

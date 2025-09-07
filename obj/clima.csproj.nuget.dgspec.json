@@ -44,6 +44,14 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[9.0.8, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[9.0.8, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.3, )"
@@ -55,6 +63,10 @@
             "Spectre.Console.Cli": {
               "target": "Package",
               "version": "[0.50.0, )"
+            },
+            "openmeteo_sdk": {
+              "target": "Package",
+              "version": "[1.20.1, )"
             }
           },
           "imports": [
