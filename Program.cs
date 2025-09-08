@@ -1,45 +1,47 @@
 ﻿using Spectre.Console;
-using System.IO;
-using clima.Models;
-using System.Net.Http;
-
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public static class Program
 {
     public static async Task Main(string[] args)
     {
-        // string mainDir = AppDomain.CurrentDomain.BaseDirectory;
-        // string config = "config/config.json";
-        // string configPath = Path.Combine(mainDir, config);
-        //
-        // if (!File.Exists(configPath)){
-        //     try{
-        //         FileStream fs = File.Create(configPath);
-        //         fs.Close();
-        //     }catch(Exception){
-        //         AnsiConsole.Markup("[red]Error al crear archivo de configuracion[/]");        
-        //     }
-        // }else{
-        //
-        // }
-        //
-		await Response();
+        AnsiConsole.Clear();
+
+        var menu = AnsiConsole.Prompt(
+                new SelectionPrompt<string>().
+                Title("Seleccione su opcion!")
+                .AddChoices(new[]{
+                    "Ingresar Ubicación",
+                    "Preferencias",
+                    "Salir"
+                    })
+                );
+        switch (menu)
+        {
+            case "Ingresar Ubicación":
+                await setLocation();
+                break;
+        }
     }
 
+    public static async Task setLocation()
+    {
+        WeatherService weatherService = new();
 
-		public static async Task Response (){
+        var location = AnsiConsole.Prompt(
+                new TextPrompt<string>("Ingrese su localidad! [blue](provincia, localidad, pais)[/]")
+                );
 
-				try{
-				var client = new HttpClient();
-				var response = await client.GetAsync("https://geocoding-api.open-meteo.com/v1/search?name=Paris&count=1");
-				var jsonString = await response.Content.ReadAsStringAsync();
-				Console.WriteLine("Raw JSON:");
-				Console.WriteLine(jsonString);
-				}catch(Exception ex){
-						AnsiConsole.Markup($"Hubo un error! {ex.Message}");
-				}
-		
-		}
-
+        try
+        {
+            var result = await weatherService.GetCurrentWeatherAsync(location);
+            if (result == null)
+                AnsiConsole.MarkupLine("[red]No se encontraron datos de clima.[/]");
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[red]Error inesperado:[/] {ex.Message}");
+        }
+    }
 }
- 

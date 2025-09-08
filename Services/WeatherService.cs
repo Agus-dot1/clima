@@ -1,7 +1,9 @@
 using System.Text.Json;
+using System.Globalization;
 using clima.Models;
+using Spectre.Console;
 
-public class WeatherService
+public class WeatherService : IDisposable
 {
     private readonly HttpClient _httpClient;
     private const string WeatherBaseUrl = "https://api.open-meteo.com/v1/forecast";
@@ -14,37 +16,75 @@ public class WeatherService
 
     public async Task<WeatherResponse> GetCurrentWeatherAsync(string location)
     {
-        var coordinates = await GetCoordinatesAsync(location);
-    }
-
-    private async Task<GeoLocation> GetCoordinatesAsync(string location)
-    {
-        string geocodingUrl = $"{GeocodingBaseUrl}?name={Uri.EscapeDataString(location)}&count=3?&language=es";
-
         try
         {
-            var response = _httpClient.GetAsync(geocodingUrl);
-            string jsonContent = await response.Result.Content.ReadAsStringAsync();
+            var coordinates = await GetCoordinatesAsync(location);
+
+
+
+            string weatherUrl =
+                $"{WeatherBaseUrl}?latitude={coordinates.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={coordinates.Longitude.ToString(CultureInfo.InvariantCulture)}&hourly=temperature_2m&timezone=auto&apparent_temperature,weather_code";
+
+
+
+            var response = await _httpClient.GetAsync(weatherUrl);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                AnsiConsole.MarkupLine("error en el fetch");
+                return null;
+            }
+
+            string jsonContent = await response.Content.ReadAsStringAsync();
+
+            var result = JsonSerializer.Deserialize<WeatherResponse>(jsonContent);
+if (result == null)
+{
+    AnsiConsole.MarkupLine("[red]Error: no se pudo deserializar la respuesta[/]");
+    return null!;
+}
+
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"Error: {ex.Message}");
+            return null;
+        }
+    }
+    private async Task<GeoLocation> GetCoordinatesAsync(string location)
+    {
+        string geocodingUrl = $"{GeocodingBaseUrl}?name={Uri.EscapeDataString(location)}&count=3&language=es";
+        try
+        {
+            var response = await _httpClient.GetAsync(geocodingUrl);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                AnsiConsole.MarkupLine($"Error en geocoding: {response.StatusCode}");
+                return null;
+            }
+
+            string jsonContent = await response.Content.ReadAsStringAsync();
+
             var geocodingData = JsonSerializer.Deserialize<GeocodingResponse>(jsonContent);
 
-            if (geocodingData?.Results?.Any() == true)
-            {
-                return geocodingData.Results.First();
-            }
-            else
-            {
-                throw new Exception($"No se encontró! '{location}', probá ser mas específico.");
-            }
-     
 
+            if (geocodingData?.Results?.Any() != true)
+                throw new Exception($"No se encontró '{location}', probá ser más específico.");
 
-
+            return geocodingData.Results.First();
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            Console.Write(ex);
+            throw new Exception($"Error al obtener coordenadas para '{location}'", ex);
         }
+    }
 
+    public void Dispose()
+    {
+        _httpClient?.Dispose();
     }
 
 }
