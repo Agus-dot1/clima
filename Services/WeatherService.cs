@@ -23,7 +23,7 @@ public class WeatherService : IDisposable
 
 
             string weatherUrl =
-                $"{WeatherBaseUrl}?latitude={coordinates.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={coordinates.Longitude.ToString(CultureInfo.InvariantCulture)}&hourly=temperature_2m&timezone=auto&apparent_temperature,weather_code";
+                $"{WeatherBaseUrl}?latitude={coordinates.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={coordinates.Longitude.ToString(CultureInfo.InvariantCulture)}&hourly=temperature_2m";
 
 
 
@@ -31,18 +31,17 @@ public class WeatherService : IDisposable
 
             if (!response.IsSuccessStatusCode)
             {
-                AnsiConsole.MarkupLine("error en el fetch");
-                return null;
+                throw new Exception($"Error en open-meteo {response.StatusCode}");
             }
 
             string jsonContent = await response.Content.ReadAsStringAsync();
 
             var result = JsonSerializer.Deserialize<WeatherResponse>(jsonContent);
-if (result == null)
-{
-    AnsiConsole.MarkupLine("[red]Error: no se pudo deserializar la respuesta[/]");
-    return null!;
-}
+            if (result == null)
+            {
+                AnsiConsole.MarkupLine("[red]Error: no se pudo deserializar la respuesta[/]");
+                return null!;
+            }
 
 
             return result;
@@ -62,8 +61,7 @@ if (result == null)
 
             if (!response.IsSuccessStatusCode)
             {
-                AnsiConsole.MarkupLine($"Error en geocoding: {response.StatusCode}");
-                return null;
+                throw new Exception($"Error en geocoding {response.StatusCode}");
             }
 
             string jsonContent = await response.Content.ReadAsStringAsync();

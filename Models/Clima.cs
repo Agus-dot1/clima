@@ -5,59 +5,61 @@ namespace clima.Models
     public class WeatherResponse
     {
         [JsonPropertyName("location")]
-        public Location Location { get; set; }
+        public Location Location { get; init; }
 
-        [JsonPropertyName("current")]
-        public Current Current { get; set; }
+        [JsonPropertyName("hourly")]
+        public Hourly Hourly { get; init; }
     }
+
 
     public class Location
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public required string Name { get; init; }
 
         [JsonPropertyName("region")]
-        public string Region { get; set; }
+        public required string Region { get; init; }
 
         [JsonPropertyName("country")]
-        public string Country { get; set; }
+        public required string Country { get; init; }
 
         [JsonPropertyName("localtime")]
-        public string LocalTime { get; set; }
+        public DateTime LocalTime { get; init; }
     }
 
-    public class Current
-    {
-        [JsonPropertyName("temp_c")]
-        public double TemperatureC { get; set; }
 
-        [JsonPropertyName("temp_f")]
-        public double TemperatureF { get; set; }
+    public class Hourly
+    {
+        [JsonPropertyName("time")]
+        public DateTime[] Time { get; init; }
+
+        [JsonPropertyName("temperature_2m")]
+        public double[] Temperature2m { get; init; }
 
         [JsonPropertyName("condition")]
-        public Condition Condition { get; set; }
+        public Condition Condition { get; init; }
 
         [JsonPropertyName("wind_kph")]
-        public double WindKph { get; set; }
+        public double WindKph { get; init; }
 
         [JsonPropertyName("humidity")]
-        public int Humidity { get; set; }
+        public byte Humidity { get; init; }
 
         [JsonPropertyName("feelslike_c")]
-        public double FeelsLikeC { get; set; }
+        public double FeelsLikeCelsius { get; init; }
 
         [JsonPropertyName("feelslike_f")]
-        public double FeelsLikeF { get; set; }
+        public double FeelsLikeFahrenheit { get; init; }
     }
 
 
     public class Condition
     {
         [JsonPropertyName("text")]
-        public string Text { get; set; }
+        public required string Text { get; set; }
 
         [JsonPropertyName("icon")]
-        public string Icon { get; set; }
+        public required string Icon { get; set; }
     }
 
 }
