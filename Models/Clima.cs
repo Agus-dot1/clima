@@ -9,6 +9,10 @@ namespace clima.Models
 
         [JsonPropertyName("hourly")]
         public Hourly Hourly { get; init; }
+
+        [JsonPropertyName("daily")]
+        public Daily Daily { get; init; }
+
     }
 
 
@@ -34,7 +38,7 @@ namespace clima.Models
         public DateTime[] Time { get; init; }
 
         [JsonPropertyName("temperature_2m")]
-        public double[] Temperature2m { get; init; }
+        public double[] TemperatureC { get; init; }    
 
         [JsonPropertyName("condition")]
         public Condition Condition { get; init; }
@@ -45,11 +49,22 @@ namespace clima.Models
         [JsonPropertyName("humidity")]
         public byte Humidity { get; init; }
 
-        [JsonPropertyName("feelslike_c")]
-        public double FeelsLikeCelsius { get; init; }
+        [JsonPropertyName("apparent_temperature")]
+        public double[] apparent_temperature { get; init; }
 
         [JsonPropertyName("feelslike_f")]
         public double FeelsLikeFahrenheit { get; init; }
+    }
+
+    public class Daily {
+        [JsonPropertyName("temperature_2m_min")]
+        public double[] temperature_2m_min { get; init; }
+
+        [JsonPropertyName("temperature_2m_mean")]
+        public double[] temperature_2m_mean { get; init; }
+
+        [JsonPropertyName("temperature_2m_max")]
+        public double[] temperature_2m_max { get; init; }
     }
 
 

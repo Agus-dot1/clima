@@ -9,8 +9,8 @@ public static class Program
     {
         AnsiConsole.Clear();
 
-        
-            string ascii = """
+
+        string ascii = """
               .
                					
               |					
@@ -25,33 +25,15 @@ public static class Program
        ((    (..__.:'-'   .=(   )   ` _`  ) )
 `.     `(       ) )       (   .  )     (   )  ._
   )      ` __.:'   )     (   (   ))     `-'.:(`  )
-)  )  ( )       --'       `- __.'          :(      ))
+)
+    )  ( )       --'       `- __.'          :(      ))
 .-'  (_.'          .')                    `(    )  ))
                   (_  )                     ` __.:'
                                         	
 """;
+        await setLocation();
 
-        // Create the layout
-        var layout = new Layout("Root")
-            .SplitColumns(
-                new Layout("Clima"),
-                new Layout("Right")
-                    .SplitRows(
-                        new Layout("Precipitacion"),
-                        new Layout("Humedad")));
 
-        // Update the left column
-        layout["Clima"].Update(
-            new Panel(
-                Align.Center(
-                    new Markup($"{ascii}"),
-                    VerticalAlignment.Middle))
-                .Expand());
-
-        
-
-        // Render the layout
-        AnsiConsole.Write(layout);
 
 
         // var menu = AnsiConsole.Prompt(
@@ -70,26 +52,50 @@ public static class Program
 
         //         break;
         // }
-        Console.ReadKey();
     }
 
     public static async Task setLocation()
     {
         WeatherService weatherService = new();
 
+
         // var location = AnsiConsole.Prompt(
         //         new TextPrompt<string>("Ingrese su localidad! [blue](provincia, localidad, pais)[/]")
         //         );
-        string location = "";
+        string location = "Buenos aires";
         try
         {
+            var country = await weatherService.GetCoordinatesAsync(location);
             var result = await weatherService.GetCurrentWeatherAsync(location);
+
+
             if (result?.Hourly == null)
             {
                 AnsiConsole.MarkupLine("[red]No se encontraron datos de clima.[/]");
                 return;
             }
 
+            // Create a table
+            var table = new Table();
+
+            // Add some columns
+            table.AddColumn($"Clima para hoy [blue]{country.Country}[/]");
+            table.AddColumn(new TableColumn("Sensación térmica").Centered());
+
+            foreach (var degree in result.Daily.temperature_2m_min)
+                table.AddRow($"[blue]{degree}[/]");
+
+            foreach (var degree in result.Daily.temperature_2m_mean)
+                table.AddRow($"{degree}");
+
+            foreach (var degree in result.Daily.temperature_2m_max)
+                table.AddRow($"[red]{degree}[/]");
+
+
+            // Add some rows
+            table.AddRow(new Markup("[blue]Corgi[/]"), new Panel("Waldo"));
+            // Render the table to the console
+            AnsiConsole.Write(table);
 
         }
         catch (Exception ex)

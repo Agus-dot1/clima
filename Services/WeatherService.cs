@@ -23,7 +23,7 @@ public class WeatherService : IDisposable
 
 
             string weatherUrl =
-                $"{WeatherBaseUrl}?latitude={coordinates.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={coordinates.Longitude.ToString(CultureInfo.InvariantCulture)}&hourly=temperature_2m";
+                $"{WeatherBaseUrl}?latitude={coordinates.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={coordinates.Longitude.ToString(CultureInfo.InvariantCulture)}&hourly=temperature_2m&daily=temperature_2m_min,temperature_2m_mean,temperature_2m_max";
 
 
 
@@ -52,7 +52,9 @@ public class WeatherService : IDisposable
             return null;
         }
     }
-    private async Task<GeoLocation> GetCoordinatesAsync(string location)
+
+
+    public async Task<GeoLocation> GetCoordinatesAsync(string location)
     {
         string geocodingUrl = $"{GeocodingBaseUrl}?name={Uri.EscapeDataString(location)}&count=3&language=es";
         try
