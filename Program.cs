@@ -82,14 +82,18 @@ public static class Program
             table.AddColumn($"Clima para hoy [blue]{country.Country}[/]");
             table.AddColumn(new TableColumn("Sensación térmica").Centered());
 
-            foreach (var degree in result.Daily.temperature_2m_min)
-                table.AddRow($"[blue]{degree}[/]");
+            // foreach (var degree in result.Daily.temperature_2m_min[0])
+            //     table.AddRow($"[blue]{degree}[/]");
 
-            foreach (var degree in result.Daily.temperature_2m_mean)
-                table.AddRow($"{degree}");
+            // foreach (var degree in result.Daily.temperature_2m_mean[2])
+            //     table.AddRow($"{degree}");
 
-            foreach (var degree in result.Daily.temperature_2m_max)
-                table.AddRow($"[red]{degree}[/]");
+            // foreach (var degree in result.Daily.temperature_2m_max[3])
+            //     table.AddRow($"[red]{degree}[/]");
+            table.AddRow($"{result.Daily.temperature_2m_mean[2]}");
+            table.AddRow(new Panel($"[blue]{result.Daily.temperature_2m_min[0]}[/]")
+                    , new Panel($"[red]{result.Daily.temperature_2m_max[3]}[/]"));
+
 
 
             // Add some rows
