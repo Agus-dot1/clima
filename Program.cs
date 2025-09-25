@@ -75,31 +75,21 @@ public static class Program
                 return;
             }
 
-            // Create a table
-            var table = new Table();
-
-            // Add some columns
-            table.AddColumn($"Clima para hoy [blue]{country.Country}[/]");
-            table.AddColumn(new TableColumn("Sensación térmica").Centered());
-
-            // foreach (var degree in result.Daily.temperature_2m_min[0])
-            //     table.AddRow($"[blue]{degree}[/]");
-
-            // foreach (var degree in result.Daily.temperature_2m_mean[2])
-            //     table.AddRow($"{degree}");
-
-            // foreach (var degree in result.Daily.temperature_2m_max[3])
-            //     table.AddRow($"[red]{degree}[/]");
-            table.AddRow($"{result.Daily.temperature_2m_mean[2]}");
-            table.AddRow(new Panel($"[blue]{result.Daily.temperature_2m_min[0]}[/]")
-                    , new Panel($"[red]{result.Daily.temperature_2m_max[3]}[/]"));
+                int aux = 0;
+            foreach(var temp in result.Daily.temperature_2m_mean){
 
 
 
-            // Add some rows
-            table.AddRow(new Markup("[blue]Corgi[/]"), new Panel("Waldo"));
-            // Render the table to the console
-            AnsiConsole.Write(table);
+            var panel = new Panel(
+            new Markup($"Temp actual: {result.Daily.temperature_2m_mean[aux]}\n[blue]Mín: {result.Daily.temperature_2m_min[aux]}[/]\n[red]Máx: {result.Daily.temperature_2m_max[aux]}[/]")
+            ).Header("Clima de hoy");
+
+            AnsiConsole.Write(panel);
+
+            aux++;
+            }
+        
+
 
         }
         catch (Exception ex)
