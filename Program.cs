@@ -1,7 +1,8 @@
 ﻿using Spectre.Console;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
+using Spectre.Console;
+using Spectre.Console.Rendering;
 
 public static class Program
 {
@@ -10,33 +11,13 @@ public static class Program
         AnsiConsole.Clear();
 
 
-        string ascii = """
-              .
-               					
-              |					
-     .               /				
-      \       I     				
-                  /
-        \  ,g88R_
-          d888(`  ).                   _
- -  --==  888(     ).=--           .+(`  )`.
-)         Y8P(       '`.          :(   .    )
-        .+(`(      .   )     .--  `.  (    ) )
-       ((    (..__.:'-'   .=(   )   ` _`  ) )
-`.     `(       ) )       (   .  )     (   )  ._
-  )      ` __.:'   )     (   (   ))     `-'.:(`  )
-)
-    )  ( )       --'       `- __.'          :(      ))
-.-'  (_.'          .')                    `(    )  ))
-                  (_  )                     ` __.:'
-                                        	
-""";
         await setLocation();
 
 
 
 
         // var menu = AnsiConsole.Prompt(
+        //         OOO
         //         new SelectionPrompt<string>().
         //         Title("Seleccione su opcion!")
         //         .AddChoices(new[]{
@@ -62,7 +43,7 @@ public static class Program
         // var location = AnsiConsole.Prompt(
         //         new TextPrompt<string>("Ingrese su localidad! [blue](provincia, localidad, pais)[/]")
         //         );
-        string location = "Buenos aires";
+        string location = "Buenos Aires";
         try
         {
             var country = await weatherService.GetCoordinatesAsync(location);
@@ -75,22 +56,94 @@ public static class Program
                 return;
             }
 
-                int aux = 0;
-            foreach(var temp in result.Daily.temperature_2m_mean){
 
+            var table = new Table();
+            table.Border = TableBorder.Rounded;
+            table.Title("Clima de hoy");
 
+            table.AddColumn(new TableColumn("Hora").Centered());
+            table.AddColumn(new TableColumn("Temperatura (°C)").Centered());
+            table.AddColumn(new TableColumn("Clima").Centered());
 
-            var panel = new Panel(
-            new Markup($"Temp actual: {result.Daily.temperature_2m_mean[aux]}\n[blue]Mín: {result.Daily.temperature_2m_min[aux]}[/]\n[red]Máx: {result.Daily.temperature_2m_max[aux]}[/]")
-            ).Header("Clima de hoy");
+            int[] posiciones = { 8, 10, 12, 14, 16, 18, 20, 22, 23 };
 
-            AnsiConsole.Write(panel);
-
-            aux++;
+            string ColorearTemp(double temp)
+            {
+                if (temp < 18) return $"[blue]{temp:0.#}°C[/]";
+                if (temp < 25) return $"[yellow]{temp:0.#}°C[/]";
+                return $"[red]{temp:0.#}°C[/]";
             }
-        
+
+            string IconoClima(int hora)
+            {
+                if (hora >= 6 && hora <= 18)
+                {
+                    if (hora < 10) return "☀";
+                    if (hora < 16) return " ⛅";
+                    return "☁";
+                }
+                else
+                {
+                    return "  🌛";
+                }
+            }
+
+            foreach (var pos in posiciones)
+            {
+                table.AddRow(
+                    $"[bold]{pos:00}:00[/]",
+                    ColorearTemp(result.Hourly.TemperatureC[pos + 2]),
+                    IconoClima(pos)
+                );
+            }
+
+            string nubesAscii = @"
+      .--.                 .---.
+   .-(    )..--.        .-(     ).
+  (___.__)__)___).     (___.__)___)
+";
+
+            AnsiConsole.WriteLine(nubesAscii);
+            AnsiConsole.Write(table);
+            AnsiConsole.MarkupLine("Temperaturas de la semana:");
 
 
+            var grid = new Grid();
+            // Cantidad de columnas = cantidad de días
+            for (int i = 0; i < result.Daily.temperature_2m_mean.Length; i++)
+            {
+                grid.AddColumn(new GridColumn().Centered());
+            }
+
+            int aux = 0;
+            List<IRenderable> columnas = new();
+
+            foreach (var _ in result.Daily.temperature_2m_mean)
+            {
+                double mean = result.Daily.temperature_2m_mean[aux];
+                double min = result.Daily.temperature_2m_min[aux];
+                double max = result.Daily.temperature_2m_max[aux];
+
+                string icono = mean switch
+                {
+                    < 15 => "☁",
+                    < 22 => "⛅",
+                    < 28 => "☀",
+                    _ => "🔥"
+                };
+
+                var dayTable = new Table();
+                dayTable.Border = TableBorder.Rounded;
+                dayTable.AddColumn(new TableColumn($"[bold]{icono} Día {aux + 1}[/]").Centered().Width(25));
+                dayTable.AddRow($"[yellow]Promedio: {mean:0.#}°C[/]");
+                dayTable.AddRow($"[blue]Min: {min:0.#}°C[/]\n[red]Max: {max:0.#}°C[/]");
+
+                columnas.Add(dayTable);
+                aux++;
+            }
+
+            grid.AddRow(columnas.ToArray());
+            AnsiConsole.Write(grid);
         }
         catch (Exception ex)
         {

@@ -9,6 +9,8 @@ public class WeatherService : IDisposable
     private const string WeatherBaseUrl = "https://api.open-meteo.com/v1/forecast";
     private const string GeocodingBaseUrl = "https://geocoding-api.open-meteo.com/v1/search";
 
+
+
     public WeatherService()
     {
         _httpClient = new HttpClient();
@@ -16,11 +18,11 @@ public class WeatherService : IDisposable
 
     public async Task<WeatherResponse> GetCurrentWeatherAsync(string location)
     {
+        List<WeatherResponse> listaClima = new List<WeatherResponse>();
+
         try
         {
             var coordinates = await GetCoordinatesAsync(location);
-
-
 
             string weatherUrl =
                 $"{WeatherBaseUrl}?latitude={coordinates.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={coordinates.Longitude.ToString(CultureInfo.InvariantCulture)}&hourly=temperature_2m&daily=temperature_2m_min,temperature_2m_mean,temperature_2m_max";
@@ -42,7 +44,6 @@ public class WeatherService : IDisposable
                 AnsiConsole.MarkupLine("[red]Error: no se pudo deserializar la respuesta[/]");
                 return null!;
             }
-
 
             return result;
         }
