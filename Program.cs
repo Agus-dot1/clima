@@ -9,33 +9,40 @@ public static class Program
     public static async Task Main(string[] args)
     {
         AnsiConsole.Clear();
+        string location = "Buenos Aires";
+
+        foreach(var arg in args){
+            if(arg == "--c" || arg == "-c"){
+                
+        var menu = AnsiConsole.Prompt(
+                new SelectionPrompt<string>().
+                Title("Seleccione su opcion!")
+                .AddChoices(new[]{
+                    "Ingresar Ubicación",
+                    "Preferencias",
+                    "Salir"
+                    })
+                );
+        switch (menu)
+        {
+            case "Ingresar Ubicación":
+                location = AnsiConsole.Prompt(new TextPrompt<string>("Ingresa tu provincia o localidad! [blue](Buenos Aires, Caballito, Avellaneda)[/]:"));
+                await setLocation(location);
+                break;
+        }
+
+            }
+        }
+
+   
 
 
-        await setLocation();
 
-
-
-
-        // var menu = AnsiConsole.Prompt(
-        //         OOO
-        //         new SelectionPrompt<string>().
-        //         Title("Seleccione su opcion!")
-        //         .AddChoices(new[]{
-        //             "Ingresar Ubicación",
-        //             "Preferencias",
-        //             "Salir"
-        //             })
-        //         );
-        // switch (menu)
-        // {
-        //     case "Ingresar Ubicación":
-        //         await setLocation();
-
-        //         break;
-        // }
+        
+        
     }
 
-    public static async Task setLocation()
+    public static async Task setLocation(string location)
     {
         WeatherService weatherService = new();
 
@@ -43,10 +50,8 @@ public static class Program
         // var location = AnsiConsole.Prompt(
         //         new TextPrompt<string>("Ingrese su localidad! [blue](provincia, localidad, pais)[/]")
         //         );
-        string location = "Buenos Aires";
         try
         {
-            var country = await weatherService.GetCoordinatesAsync(location);
             var result = await weatherService.GetCurrentWeatherAsync(location);
 
 
@@ -55,6 +60,9 @@ public static class Program
                 AnsiConsole.MarkupLine("[red]No se encontraron datos de clima.[/]");
                 return;
             }
+                
+          
+
 
 
             var table = new Table();

@@ -18,8 +18,6 @@ public class WeatherService : IDisposable
 
     public async Task<WeatherResponse> GetCurrentWeatherAsync(string location)
     {
-        List<WeatherResponse> listaClima = new List<WeatherResponse>();
-
         try
         {
             var coordinates = await GetCoordinatesAsync(location);
@@ -57,7 +55,7 @@ public class WeatherService : IDisposable
 
     public async Task<GeoLocation> GetCoordinatesAsync(string location)
     {
-        string geocodingUrl = $"{GeocodingBaseUrl}?name={Uri.EscapeDataString(location)}&count=3&language=es";
+        string geocodingUrl = $"{GeocodingBaseUrl}?name={Uri.EscapeDataString(location)}&count=5&language=es";
         try
         {
             var response = await _httpClient.GetAsync(geocodingUrl);
@@ -75,7 +73,23 @@ public class WeatherService : IDisposable
             if (geocodingData?.Results?.Any() != true)
                 throw new Exception($"No se encontró '{location}', probá ser más específico.");
 
-            return geocodingData.Results.First();
+
+            List<string> countries = new List<string>();
+            foreach (var result in geocodingData.Results)
+            {
+                countries.Add(result.DisplayName);
+            }
+
+            var countrySelected = AnsiConsole.Prompt(new SelectionPrompt<string>().Title("Seleccione el mas cercano").AddChoices(countries));
+
+            foreach (var result in geocodingData.Results)
+            {
+                if (countrySelected == result.DisplayName)
+                {
+                    return result;
+                }
+            }
+            return null;
         }
         catch (Exception ex)
         {
