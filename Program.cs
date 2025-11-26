@@ -11,38 +11,36 @@ public static class Program
         UserPreferences preferences = ConfigService.LoadPreferences();
         string location;
 
-        foreach (var arg in args)
-        {
-            if (arg == "--c" || arg == "-c")
+
+            if (args[0] == "--c" || args[0] == "-c")
             {
 
                 var menu = AnsiConsole.Prompt(
                         new SelectionPrompt<string>().
-                        Title("Seleccione su opcion!")
+                        Title("Select your option!")
                         .AddChoices(new[]{
-                    "Ingresar Ubicación",
-                    "Preferencias",
-                    "Salir"
+                    "Enter Location",
+                    "Preferences",
+                    "Exit"
                             })
                         );
                 switch (menu)
                 {
-                    case "Ingresar Ubicación":
-                        location = AnsiConsole.Prompt(new TextPrompt<string>("Ingresa tu provincia o localidad! [blue](Buenos Aires, Caballito, Avellaneda)[/]:"));
+                    case "Enter Location":
+                        location = AnsiConsole.Prompt(new TextPrompt<string>("Enter your province or city! [blue](Buenos Aires, Caballito, Avellaneda)[/]:"));
                         await setLocation(location);
                         break;
-                    case "Preferencias":
+                    case "Preferences":
                         setPreferences(preferences);
                         break;
-                    case "Salir":
+                    case "Exit":
                         return;
                 }
             }
-        }
 
         if (preferences.City == null)
         {
-            location = AnsiConsole.Prompt(new TextPrompt<string>("Ingresa tu provincia o localidad! [blue](Buenos Aires, Caballito, Avellaneda)[/]:"));
+            location = AnsiConsole.Prompt(new TextPrompt<string>("Enter your province or city! [blue](Buenos Aires, Caballito, Avellaneda)[/]:"));
             await setLocation(location);
             return;
         }
@@ -55,43 +53,43 @@ public static class Program
     {
         var option = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-            .Title("Selecciona tus preferencias")
-            .AddChoices("Tema", "Unidad de medida")
+            .Title("Select your preferences")
+            .AddChoices("Theme", "Unit of measurement")
         );
 
         switch (option)
         {
-            case "Tema":
-                var temas = AnsiConsole.Prompt(
+            case "Theme":
+                var themes = AnsiConsole.Prompt(
                     new MultiSelectionPrompt<string>()
-                        .Title("Elegí el estilo visual")
+                        .Title("Choose visual style")
                         .NotRequired()
                         .InstructionsText(
             "[grey](Press [blue]<space>[/] to toggle a option, " +
             "[green]<enter>[/] to accept)[/]")
-                        .AddChoices("Colorido", "Diseño compacto")
+                        .AddChoices("Colorful", "Compact design")
                 );
 
 
-                preferences.Tema = temas.Contains("Colorido")
+                preferences.Theme = themes.Contains("Colorful")
                     ? Theme.Colored
                     : Theme.Plain;
 
 
-                preferences.Modo = temas.Contains("Diseño compacto")
+                preferences.Mode = themes.Contains("Compact design")
                     ? Verbosity.Compact
                     : Verbosity.Extended;
 
                 break;
 
-            case "Unidad de medida":
-                var unidad = AnsiConsole.Prompt(
+            case "Unit of measurement":
+                var unit = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
-                        .Title("Elegí la unidad")
+                        .Title("Choose unit")
                         .AddChoices("Celsius", "Fahrenheit")
                 );
 
-                preferences.Unidad = unidad == "Celsius"
+                preferences.Unit = unit == "Celsius"
                     ? Unit.Celsius
                     : Unit.Fahrenheit;
 
@@ -100,7 +98,7 @@ public static class Program
 
         ConfigService.SavePreferences(preferences);
 
-        AnsiConsole.MarkupLine("[green]Preferencias actualizadas[/]");
+        AnsiConsole.MarkupLine("[green]Preferences updated[/]");
     }
 
     public static async Task setLocation(string location)
@@ -114,13 +112,13 @@ public static class Program
 
             if (result?.Hourly == null)
             {
-                AnsiConsole.MarkupLine("[red]No se encontraron datos de clima.[/]");
+                AnsiConsole.MarkupLine("[red]No weather data found.[/]");
                 return;
             }
         }
         catch (Exception ex)
         {
-            AnsiConsole.MarkupLine($"[red]Error inesperado:[/] {ex.Message}");
+            AnsiConsole.MarkupLine($"[red]Unexpected error:[/] {ex.Message}");
         }
     }
 }

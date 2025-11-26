@@ -24,27 +24,27 @@ public class WeatherService : IDisposable
 
         var table = new Table();
         table.Border = TableBorder.Rounded;
-        table.Title($"Clima de hoy en {config.Name}");
+        table.Title($"Today's weather in {config.Name}");
 
-        table.AddColumn(new TableColumn("Hora").Centered());
-        table.AddColumn(new TableColumn("Temperatura (°C)").Centered());
-        table.AddColumn(new TableColumn("Clima").Centered());
+        table.AddColumn(new TableColumn("Time").Centered());
+        table.AddColumn(new TableColumn("Temperature (°C)").Centered());
+        table.AddColumn(new TableColumn("Weather").Centered());
 
-        int[] posiciones = { 8, 10, 12, 14, 16, 18, 20, 22, 23 };
+        int[] positions = { 8, 10, 12, 14, 16, 18, 20, 22, 23 };
 
-        string ColorearTemp(double temp)
+        string ColorizeTemp(double temp)
         {
             if (temp < 18) return $"[blue]{temp:0.#}°C[/]";
             if (temp < 25) return $"[yellow]{temp:0.#}°C[/]";
             return $"[red]{temp:0.#}°C[/]";
         }
 
-        string IconoClima(int hora)
+        string GetWeatherIcon(int hour)
         {
-            if (hora >= 6 && hora <= 18)
+            if (hour >= 6 && hour <= 18)
             {
-                if (hora < 10) return "☀";
-                if (hora < 16) return " ⛅";
+                if (hour < 10) return "☀";
+                if (hour < 16) return " ⛅";
                 return "☁";
             }
             else
@@ -53,24 +53,24 @@ public class WeatherService : IDisposable
             }
         }
 
-        foreach (var pos in posiciones)
+        foreach (var pos in positions)
         {
             table.AddRow(
                 $"[bold]{pos:00}:00[/]",
-                ColorearTemp(result.Hourly.TemperatureC[pos + 2]),
-                IconoClima(pos)
+                ColorizeTemp(result.Hourly.TemperatureC[pos + 2]),
+                GetWeatherIcon(pos)
             );
         }
 
-        string nubesAscii = @"
+        string cloudsAscii = @"
       .--.                 .---.
    .-(    )..--.        .-(     ).
   (___.__)__)___).     (___.__)___)
 ";
 
-        AnsiConsole.WriteLine(nubesAscii);
+        AnsiConsole.WriteLine(cloudsAscii);
         AnsiConsole.Write(table);
-        AnsiConsole.MarkupLine("Temperaturas de la semana:");
+        AnsiConsole.MarkupLine("Weekly temperatures:");
 
 
         var grid = new Grid();
@@ -81,16 +81,16 @@ public class WeatherService : IDisposable
             grid.AddColumn(new GridColumn().Centered());
         }
 
-        int aux = 0;
-        List<IRenderable> columnas = new();
+        int dayIndex = 0;
+        List<IRenderable> columns = new();
 
         foreach (var _ in result.Daily.temperature_2m_mean)
         {
-            double mean = result.Daily.temperature_2m_mean[aux];
-            double min = result.Daily.temperature_2m_min[aux];
-            double max = result.Daily.temperature_2m_max[aux];
+            double mean = result.Daily.temperature_2m_mean[dayIndex];
+            double min = result.Daily.temperature_2m_min[dayIndex];
+            double max = result.Daily.temperature_2m_max[dayIndex];
 
-            string icono = mean switch
+            string icon = mean switch
             {
                 < 15 => "☁",
                 < 22 => "⛅",
@@ -100,15 +100,15 @@ public class WeatherService : IDisposable
 
             var dayTable = new Table();
             dayTable.Border = TableBorder.Rounded;
-            dayTable.AddColumn(new TableColumn($"[bold]{icono} Día {aux + 1}[/]").Centered().Width(25));
-            dayTable.AddRow($"[yellow]Promedio: {mean:0.#}°C[/]");
+            dayTable.AddColumn(new TableColumn($"[bold]{icon} Day {dayIndex + 1}[/]").Centered().Width(25));
+            dayTable.AddRow($"[yellow]Average: {mean:0.#}°C[/]");
             dayTable.AddRow($"[blue]Min: {min:0.#}°C[/]\n[red]Max: {max:0.#}°C[/]");
 
-            columnas.Add(dayTable);
-            aux++;
+            columns.Add(dayTable);
+            dayIndex++;
         }
 
-        grid.AddRow(columnas.ToArray());
+        grid.AddRow(columns.ToArray());
         AnsiConsole.Write(grid);
 
     }
@@ -129,7 +129,7 @@ public class WeatherService : IDisposable
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"Error en open-meteo {response.StatusCode}");
+                throw new Exception($"Error in open-meteo {response.StatusCode}");
             }
 
             string jsonContent = await response.Content.ReadAsStringAsync();
@@ -137,7 +137,7 @@ public class WeatherService : IDisposable
             var result = JsonSerializer.Deserialize<WeatherResponse>(jsonContent);
             if (result == null)
             {
-                AnsiConsole.MarkupLine("[red]Error: no se pudo deserializar la respuesta[/]");
+                AnsiConsole.MarkupLine("[red]Error: could not deserialize response[/]");
                 return null!;
             }
 
@@ -154,14 +154,14 @@ public class WeatherService : IDisposable
     public async Task<GeoLocation> GetCoordinatesAsync(string location, bool settingWeather)
     {
         var config = ConfigService.LoadPreferences();
-        string geocodingUrl = $"{GeocodingBaseUrl}?name={Uri.EscapeDataString(location)}&count=5&language=es";
+        string geocodingUrl = $"{GeocodingBaseUrl}?name={Uri.EscapeDataString(location)}&count=5&language=en";
         try
         {
             var response = await _httpClient.GetAsync(geocodingUrl);
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"Error en geocoding {response.StatusCode}");
+                throw new Exception($"Error in geocoding {response.StatusCode}");
             }
 
             string jsonContent = await response.Content.ReadAsStringAsync();
@@ -170,7 +170,7 @@ public class WeatherService : IDisposable
 
 
             if (geocodingData?.Results?.Any() != true)
-                throw new Exception($"No se encontró '{location}', probá ser más específico.");
+                throw new Exception($"'{location}' not found, try being more specific.");
 
 
             List<string> countries = new List<string>();
@@ -182,7 +182,7 @@ public class WeatherService : IDisposable
             if (settingWeather)
             {
 
-                var countrySelected = AnsiConsole.Prompt(new SelectionPrompt<string>().Title("Seleccione el mas cercano").AddChoices(countries));
+                var countrySelected = AnsiConsole.Prompt(new SelectionPrompt<string>().Title("Select the closest one").AddChoices(countries));
 
                 foreach (var result in geocodingData.Results)
                 {
@@ -208,7 +208,7 @@ public class WeatherService : IDisposable
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error al obtener coordenadas para '{location}'", ex);
+            throw new Exception($"Error getting coordinates for '{location}'", ex);
         }
     }
 
