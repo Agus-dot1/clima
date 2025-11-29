@@ -1,4 +1,3 @@
-﻿using Spectre.Console;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
@@ -11,17 +10,17 @@ public static class Program
         UserPreferences preferences = ConfigService.LoadPreferences();
         string location;
 
-
+        if (args.Length > 0)
+        {
             if (args[0] == "--c" || args[0] == "-c")
             {
-
                 var menu = AnsiConsole.Prompt(
                         new SelectionPrompt<string>().
                         Title("Select your option!")
                         .AddChoices(new[]{
-                    "Enter Location",
-                    "Preferences",
-                    "Exit"
+                                "Enter Location",
+                                "Preferences",
+                                "Exit"
                             })
                         );
                 switch (menu)
@@ -38,6 +37,7 @@ public static class Program
                 }
             }
 
+        }
         if (preferences.City == null)
         {
             location = AnsiConsole.Prompt(new TextPrompt<string>("Enter your province or city! [blue](Buenos Aires, Caballito, Avellaneda)[/]:"));
@@ -92,7 +92,6 @@ public static class Program
                 preferences.Unit = unit == "Celsius"
                     ? Unit.Celsius
                     : Unit.Fahrenheit;
-
                 break;
         }
 
