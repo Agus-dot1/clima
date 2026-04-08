@@ -43,7 +43,3 @@ dotnet run --c
 - **Scoop Package**: Streamlined installation for Windows users.
 - **Compact Modes**: Tailored layouts for sidebars and small terminals.
 
----
-<p align="center">
-  <i>Stay ahead of the storm without leaving the shell.</i>
-</p>
