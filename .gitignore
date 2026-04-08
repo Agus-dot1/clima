@@ -1,0 +1,17 @@
+# .NET
+bin/
+obj/
+
+# User configuration
+config.json
+
+# IDEs
+.vs/
+.vscode/
+
+# User secrets
+secrets.json
+
+# Logs
+*.log
+build_output.txt

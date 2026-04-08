@@ -16,31 +16,32 @@ public static class Program
             {
                 var menu = AnsiConsole.Prompt(
                         new SelectionPrompt<string>().
-                        Title("Select your option!")
+                        Title(preferences.Language == Language.Spanish ? "¡Selecciona tu opción!" : "Select your option!")
                         .AddChoices(new[]{
-                                "Enter Location",
-                                "Preferences",
-                                "Exit"
+                                preferences.Language == Language.Spanish ? "Ingresar Ubicación" : "Enter Location",
+                                preferences.Language == Language.Spanish ? "Preferencias" : "Preferences",
+                                preferences.Language == Language.Spanish ? "Salir" : "Exit"
                             })
                         );
-                switch (menu)
+                if (menu == "Enter Location" || menu == "Ingresar Ubicación")
                 {
-                    case "Enter Location":
-                        location = AnsiConsole.Prompt(new TextPrompt<string>("Enter your province or city! [blue](Buenos Aires, Caballito, Avellaneda)[/]:"));
-                        await setLocation(location);
-                        break;
-                    case "Preferences":
-                        setPreferences(preferences);
-                        break;
-                    case "Exit":
-                        return;
+                    location = AnsiConsole.Prompt(new TextPrompt<string>(preferences.Language == Language.Spanish ? "¡Ingresa tu provincia o ciudad! [blue](Buenos Aires, Caballito, Avellaneda)[/]:" : "Enter your province or city! [blue](Buenos Aires, Caballito, Avellaneda)[/]:"));
+                    await setLocation(location);
+                }
+                else if (menu == "Preferences" || menu == "Preferencias")
+                {
+                    setPreferences(preferences);
+                }
+                else if (menu == "Exit" || menu == "Salir")
+                {
+                    return;
                 }
             }
 
         }
         if (preferences.City == null)
         {
-            location = AnsiConsole.Prompt(new TextPrompt<string>("Enter your province or city! [blue](Buenos Aires, Caballito, Avellaneda)[/]:"));
+            location = AnsiConsole.Prompt(new TextPrompt<string>(preferences.Language == Language.Spanish ? "¡Ingresa tu provincia o ciudad! [blue](Buenos Aires, Caballito, Avellaneda)[/]:" : "Enter your province or city! [blue](Buenos Aires, Caballito, Avellaneda)[/]:"));
             await setLocation(location);
             return;
         }
@@ -53,51 +54,69 @@ public static class Program
     {
         var option = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-            .Title("Select your preferences")
-            .AddChoices("Theme", "Unit of measurement")
+            .Title(preferences.Language == Language.Spanish ? "Selecciona tus preferencias" : "Select your preferences")
+            .AddChoices(
+                preferences.Language == Language.Spanish ? "Tema" : "Theme",
+                preferences.Language == Language.Spanish ? "Unidad de medida" : "Unit of measurement",
+                preferences.Language == Language.Spanish ? "Idioma" : "Language"
+            )
         );
 
-        switch (option)
+        if (option == "Theme" || option == "Tema")
         {
-            case "Theme":
-                var themes = AnsiConsole.Prompt(
-                    new MultiSelectionPrompt<string>()
-                        .Title("Choose visual style")
-                        .NotRequired()
-                        .InstructionsText(
-            "[grey](Press [blue]<space>[/] to toggle a option, " +
-            "[green]<enter>[/] to accept)[/]")
-                        .AddChoices("Colorful", "Compact design")
-                );
+            var themes = AnsiConsole.Prompt(
+                new MultiSelectionPrompt<string>()
+                    .Title(preferences.Language == Language.Spanish ? "Elige el estilo visual" : "Choose visual style")
+                    .NotRequired()
+                    .InstructionsText(
+        preferences.Language == Language.Spanish
+            ? "[grey](Presiona [blue]<espacio>[/] para alternar, [green]<enter>[/] para aceptar)[/]"
+            : "[grey](Press [blue]<space>[/] to toggle a option, [green]<enter>[/] to accept)[/]")
+                    .AddChoices(
+                        preferences.Language == Language.Spanish ? "Colorido" : "Colorful",
+                        preferences.Language == Language.Spanish ? "Diseño compacto" : "Compact design"
+                    )
+            );
 
 
-                preferences.Theme = themes.Contains("Colorful")
-                    ? Theme.Colored
-                    : Theme.Plain;
+            preferences.Theme = (themes.Contains("Colorful") || themes.Contains("Colorido"))
+                ? Theme.Colored
+                : Theme.Plain;
 
 
-                preferences.Mode = themes.Contains("Compact design")
-                    ? Verbosity.Compact
-                    : Verbosity.Extended;
+            preferences.Mode = (themes.Contains("Compact design") || themes.Contains("Diseño compacto"))
+                ? Verbosity.Compact
+                : Verbosity.Extended;
+        }
 
-                break;
+        else if (option == "Unit of measurement" || option == "Unidad de medida")
+        {
+            var unit = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title(preferences.Language == Language.Spanish ? "Elige la unidad" : "Choose unit")
+                    .AddChoices("Celsius", "Fahrenheit")
+            );
 
-            case "Unit of measurement":
-                var unit = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title("Choose unit")
-                        .AddChoices("Celsius", "Fahrenheit")
-                );
+            preferences.Unit = unit == "Celsius"
+                ? Unit.Celsius
+                : Unit.Fahrenheit;
+        }
+        else if (option == "Language" || option == "Idioma")
+        {
+            var lang = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title(preferences.Language == Language.Spanish ? "Selecciona el idioma" : "Select language")
+                    .AddChoices("English", "Spanish")
+            );
 
-                preferences.Unit = unit == "Celsius"
-                    ? Unit.Celsius
-                    : Unit.Fahrenheit;
-                break;
+            preferences.Language = lang == "English"
+                ? Language.English
+                : Language.Spanish;
         }
 
         ConfigService.SavePreferences(preferences);
 
-        AnsiConsole.MarkupLine("[green]Preferences updated[/]");
+        AnsiConsole.MarkupLine(preferences.Language == Language.Spanish ? "[green]Preferencias actualizadas[/]" : "[green]Preferences updated[/]");
     }
 
     public static async Task setLocation(string location)
@@ -111,13 +130,15 @@ public static class Program
 
             if (result?.Hourly == null)
             {
-                AnsiConsole.MarkupLine("[red]No weather data found.[/]");
+                UserPreferences preferences = ConfigService.LoadPreferences();
+                AnsiConsole.MarkupLine(preferences.Language == Language.Spanish ? "[red]No se encontraron datos climáticos.[/]" : "[red]No weather data found.[/]");
                 return;
             }
         }
         catch (Exception ex)
         {
-            AnsiConsole.MarkupLine($"[red]Unexpected error:[/] {ex.Message}");
+            UserPreferences preferences = ConfigService.LoadPreferences();
+            AnsiConsole.MarkupLine(preferences.Language == Language.Spanish ? $"[red]Error inesperado:[/] {ex.Message}" : $"[red]Unexpected error:[/] {ex.Message}");
         }
     }
 }

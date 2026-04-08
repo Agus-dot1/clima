@@ -13,10 +13,16 @@ public enum Unit {
     Fahrenheit
 }  
 
+public enum Language {
+    English,
+    Spanish
+}
+
 public class UserPreferences {
     public string Name { get; set; }
     public string City { get; set; }
     public Theme Theme { get; set; } = Theme.Colored;
     public Verbosity Mode { get; set; } = Verbosity.Extended;
     public Unit Unit { get; set; } = Unit.Celsius;
+    public Language Language { get; set; } = Language.English;
 }

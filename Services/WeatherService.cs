@@ -21,14 +21,19 @@ public class WeatherService : IDisposable
     {
         UserPreferences config = ConfigService.LoadPreferences();
         var result = await GetCurrentWeatherAsync(config.Name, false);
+        if (result == null)
+        {
+            AnsiConsole.MarkupLine(config.Language == Language.Spanish ? "[red]Error: No se pudo obtener el clima.[/]" : "[red]Error: Could not retrieve weather data.[/]");
+            return;
+        }
 
         var table = new Table();
         table.Border = TableBorder.Rounded;
-        table.Title($"Today's weather in {config.Name}");
+        table.Title(config.Language == Language.Spanish ? $"Clima de hoy en {config.Name}" : $"Today's weather in {config.Name}");
 
-        table.AddColumn(new TableColumn("Time").Centered());
-        table.AddColumn(new TableColumn("Temperature (°C)").Centered());
-        table.AddColumn(new TableColumn("Weather").Centered());
+        table.AddColumn(new TableColumn(config.Language == Language.Spanish ? "Hora" : "Time").Centered());
+        table.AddColumn(new TableColumn(config.Language == Language.Spanish ? "Temperatura (°C)" : "Temperature (°C)").Centered());
+        table.AddColumn(new TableColumn(config.Language == Language.Spanish ? "Clima" : "Condition").Centered());
 
         int[] positions = { 8, 10, 12, 14, 16, 18, 20, 22, 23 };
 
@@ -70,7 +75,7 @@ public class WeatherService : IDisposable
 
         AnsiConsole.WriteLine(cloudsAscii);
         AnsiConsole.Write(table);
-        AnsiConsole.MarkupLine("Weekly temperatures:");
+        AnsiConsole.MarkupLine(config.Language == Language.Spanish ? "Temperaturas semanales:" : "Weekly temperatures:");
 
 
         var grid = new Grid();
@@ -98,11 +103,16 @@ public class WeatherService : IDisposable
                 _ => "🔥"
             };
 
+            string dayText = config.Language == Language.Spanish ? "Día" : "Day";
+            string avgText = config.Language == Language.Spanish ? "Promedio" : "Average";
+            string minText = config.Language == Language.Spanish ? "Mín" : "Min";
+            string maxText = config.Language == Language.Spanish ? "Máx" : "Max";
+
             var dayTable = new Table();
             dayTable.Border = TableBorder.Rounded;
-            dayTable.AddColumn(new TableColumn($"[bold]{icon} Day {dayIndex + 1}[/]").Centered().Width(25));
-            dayTable.AddRow($"[yellow]Average: {mean:0.#}°C[/]");
-            dayTable.AddRow($"[blue]Min: {min:0.#}°C[/]\n[red]Max: {max:0.#}°C[/]");
+            dayTable.AddColumn(new TableColumn($"[bold]{icon} {dayText} {dayIndex + 1}[/]").Centered().Width(25));
+            dayTable.AddRow($"[yellow]{avgText}: {mean:0.#}°C[/]");
+            dayTable.AddRow($"[blue]{minText}: {min:0.#}°C[/]\n[red]{maxText}: {max:0.#}°C[/]");
 
             columns.Add(dayTable);
             dayIndex++;
@@ -119,6 +129,15 @@ public class WeatherService : IDisposable
         try
         {
             var coordinates = await GetCoordinatesAsync(location, settingWeather);
+
+            if (coordinates == null)
+            {
+                UserPreferences configPref = ConfigService.LoadPreferences();
+                string errorMsg = configPref.Language == Language.Spanish 
+                    ? $"No se pudieron obtener las coordenadas para '{location}'" 
+                    : $"Could not obtain coordinates for '{location}'";
+                throw new Exception(errorMsg);
+            }
 
             string weatherUrl =
                 $"{WeatherBaseUrl}?latitude={coordinates.Latitude.ToString(CultureInfo.InvariantCulture)}&longitude={coordinates.Longitude.ToString(CultureInfo.InvariantCulture)}&hourly=temperature_2m&daily=temperature_2m_min,temperature_2m_mean,temperature_2m_max";
@@ -137,7 +156,8 @@ public class WeatherService : IDisposable
             var result = JsonSerializer.Deserialize<WeatherResponse>(jsonContent);
             if (result == null)
             {
-                AnsiConsole.MarkupLine("[red]Error: could not deserialize response[/]");
+                UserPreferences configPref = ConfigService.LoadPreferences();
+                AnsiConsole.MarkupLine(configPref.Language == Language.Spanish ? "[red]Error: no se pudo deserializar la respuesta[/]" : "[red]Error: could not deserialize response[/]");
                 return null!;
             }
 
@@ -154,7 +174,8 @@ public class WeatherService : IDisposable
     public async Task<GeoLocation> GetCoordinatesAsync(string location, bool settingWeather)
     {
         var config = ConfigService.LoadPreferences();
-        string geocodingUrl = $"{GeocodingBaseUrl}?name={Uri.EscapeDataString(location)}&count=5&language=en";
+        string langCode = config.Language == Language.Spanish ? "es" : "en";
+        string geocodingUrl = $"{GeocodingBaseUrl}?name={Uri.EscapeDataString(location)}&count=5&language={langCode}";
         try
         {
             var response = await _httpClient.GetAsync(geocodingUrl);
@@ -170,7 +191,12 @@ public class WeatherService : IDisposable
 
 
             if (geocodingData?.Results?.Any() != true)
-                throw new Exception($"'{location}' not found, try being more specific.");
+            {
+                string errorMsg = config.Language == Language.Spanish 
+                    ? $"'{location}' no encontrado, intenta ser más específico." 
+                    : $"'{location}' not found, try to be more specific.";
+                throw new Exception(errorMsg);
+            }
 
 
             List<string> countries = new List<string>();
@@ -182,7 +208,9 @@ public class WeatherService : IDisposable
             if (settingWeather)
             {
 
-                var countrySelected = AnsiConsole.Prompt(new SelectionPrompt<string>().Title("Select the closest one").AddChoices(countries));
+                var countrySelected = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                    .Title(config.Language == Language.Spanish ? "Selecciona la más cercana" : "Select the closest one")
+                    .AddChoices(countries));
 
                 foreach (var result in geocodingData.Results)
                 {
@@ -202,13 +230,20 @@ public class WeatherService : IDisposable
                     if (config.City == result.DisplayName)
                         return result;
                 }
+
+                // If no exact match (likely due to language change), return the first result
+                return geocodingData.Results.First();
             }
 
             return null;
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error getting coordinates for '{location}'", ex);
+            UserPreferences configPref = ConfigService.LoadPreferences();
+            string errorMsg = configPref.Language == Language.Spanish 
+                ? $"Error al obtener coordenadas para '{location}'" 
+                : $"Error obtaining coordinates for '{location}'";
+            throw new Exception(errorMsg, ex);
         }
     }
 
