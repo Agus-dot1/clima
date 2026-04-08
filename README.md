@@ -6,29 +6,44 @@
  ╚██████╗███████╗██║██║ ╚═╝ ██║██║  ██║
   ╚═════╝╚══════╝╚═╝╚═╝     ╚═╝╚═╝  ╚═╝
 
-           Terminal Weather
+           Terminal Weather CLI
 ```
 
-# Clima
+---
 
-A simple and clean command-line weather tool built with .NET and Spectre.Console. It provides a visual way to check the weather directly from your terminal using data from the Open-Meteo API.
+<p align="center">
+  <b>A minimalist, high-density weather station for your terminal.</b><br>
+  Built with .NET 9.0 and Spectre.Console.
+</p>
 
-## Current status
+---
 
-The project is fully functional and supports a few core features:
-* Daily weather breakdown with temperature and conditions.
-* Weekly forecast with average, minimum, and maximum temperatures.
-* Persistent user preferences saved locally in a JSON file.
-* Customizable options including temperature units (Celsius/Fahrenheit) and visual themes.
-* Bilingual support for both English and Spanish cuz i can.
+### Overview
+**clima** is a lightweight tool designed for developers who prefer data over distractions. It bypasses the browser to deliver precise atmospheric forecasts directly to your console in a clean, structured format.
 
-## How it works
+### Highlights
+*   **Daily and Weekly Views**: Detailed hourly breakdowns and a 7-day outlook.
+*   **Bilingual Support**: Full toggleable support for English and Spanish.
+*   **Visual Themes**: Choose between Colorful and Plain designs to suit your terminal aesthetic.
+*   **Persistent Configuration**: Remembers your location and units across sessions.
 
-The app uses the Open-Meteo Geocoding API to find your city and the main Forecast API to retrieve weather data. It remembers your location so you don't have to enter it every time you run the tool.
+### Installation and Usage
+Once compiled, you can run the tool directly:
+```bash
+# Get weather for your saved location
+dotnet run
 
-## Future plans
+# Configure preferences (Location, Theme, Language)
+dotnet run --c
+```
 
-I am looking to expand the tool with more data and better flexibility:
-* Preferences that actually work and are persistent.
-* Scoop installation.
-* More visual themes and specialized layouts for smaller terminals.
+### Roadmap
+- **Multi-City Tracking**: Monitor several locations simultaneously.
+- **Atmospheric Vitals**: Add UV index, humidity, and air quality metrics.
+- **Scoop Package**: Streamlined installation for Windows users.
+- **Compact Modes**: Tailored layouts for sidebars and small terminals.
+
+---
+<p align="center">
+  <i>Stay ahead of the storm without leaving the shell.</i>
+</p>
